@@ -158,7 +158,7 @@ def processa_arquivo_enviado(contents, filename):
 )
 def atualiza_dashboard(jsonified_data, franquias_selecionadas, itens_selecionados):
     if not jsonified_data or not franquias_selecionadas:
-        return dbc.Alert("⬅️ Por favor, carregue um arquivo e selecione uma ou mais franquias.", color="info", className="m-4 text-center")
+        return dbc.Alert("⬅️ Por favor, carregue um arquivo e selecione uma ou mais franquias. DERCIEL MARAVILHOSO", color="info", className="m-4 text-center")
 
     df = pd.read_json(jsonified_data, orient='split')
     df['Data Emissao'] = pd.to_datetime(df['Data Emissao'], errors='coerce')
