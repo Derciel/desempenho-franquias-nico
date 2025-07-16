@@ -136,7 +136,7 @@ def atualiza_dashboard(jsonified_data, franquias_selecionadas, itens_selecionado
     df_filtrado = df[df['FRANQUIA'].isin(franquias_selecionadas)]
     if itens_selecionados:
         df_filtrado = df_filtrado[df_filtrado['Descrição Item'].isin(itens_selecionados)]
-    regex = '|'.join(CATEGORias_EXCLUIR)
+    regex = '|'.join(CATEGORIAS_EXCLUIR)
     df_filtrado = df_filtrado[~df_filtrado['Categoria'].str.contains(regex, case=False, na=False)]
 
     if df_filtrado.empty:
