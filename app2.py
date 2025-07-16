@@ -230,7 +230,3 @@ def gera_excel_para_download(n_clicks, jsonified_data, franquias_selecionadas, i
     
     return dcc.send_bytes(output_buffer.getvalue(), "Relatorio_Analitico_Franquias.xlsx")
 
-
-# --- INICIA A APLICAÇÃO ---
-if __name__ == '__main__':
-    app.run(debug=True)
