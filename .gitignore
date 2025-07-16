@@ -1,0 +1,40 @@
+# Arquivos de Cache e Bytecode do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambientes Virtuais
+# Ignora a pasta venv, que contém as bibliotecas instaladas localmente
+venv/
+.venv/
+env/
+.env
+ENV/
+env.bak
+venv.bak
+
+# Arquivos de configuração de IDEs e Editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Arquivos de dependências do Poetry (se usado)
+poetry.lock
+.pids/
+.poetry/
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos de log e bancos de dados locais
+*.log
+*.db
+*.sqlite3
+
+# Arquivos de dados e planilhas carregadas (para não expor dados sensíveis)
+# Descomente a linha abaixo se quiser ignorar todos os arquivos Excel e CSV
+# *.csv
+# *.xlsx
+# *.xls
