@@ -4,3 +4,4 @@ altair
 openpyxl
 dash
 plotly
+dash-bootstrap-components
