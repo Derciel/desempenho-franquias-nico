@@ -11,79 +11,53 @@ CATEGORIAS_EXCLUIR = ['CAIXA SORVETE/AÇAI', 'CAIXA DE PIZZA']
 
 # Inicializa a aplicação Dash com um tema profissional
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LITERA], suppress_callback_exceptions=True)
-server = app.server
+server = app.server # Essencial para o deploy com Gunicorn
 
 # --- DEFINIÇÃO DO LAYOUT DA APLICAÇÃO ---
 app.layout = dbc.Container([
     dcc.Store(id='store-dados-processados'),
-dbc.Row(
-    dbc.Col(
-        # Div para alinhar o logo e o título
-        html.Div(
-            [
-                # Componente da imagem do logo
+    
+    # Cabeçalho
+    dbc.Row(
+        dbc.Col(
+            html.Div([
                 html.Img(src='https://i.ibb.co/zWJstk81/logo-nicopel-8.png', height="50px"),
-
-                # Componente do título
-                html.H1("Dashboard de Desempenho - Nicopel Embalagens", className="text-white ms-3") # ms-3 adiciona uma margem à esquerda
-            ],
-            # Estilo para alinhar os itens
-            style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center'}
-        ),
-        # Estilo do fundo azul
-        style={'backgroundColor': "#34D315", 'padding': '15px', 'borderRadius': '5px', 'textAlign': 'center', 'marginBottom': '20px'}
-    )
-),
+                html.H1("Dashboard de Desempenho - Nicopel Embalagens", className="text-white ms-3")
+            ], style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center'}),
+            style={'backgroundColor': "#34D315", 'padding': '15px', 'borderRadius': '5px', 'textAlign': 'center', 'marginBottom': '20px'}
+        )
+    ),
+    
     dbc.Row([
         # Painel de Controle (Sidebar)
         dbc.Col([
             html.H3("Painel de Controle", className="mb-4"),
-
-            # --- NOVAS INSTRUÇÕES DE USO ---
             dbc.Alert([
                 html.H5("Instruções de Uso", className="alert-heading"),
-                html.P("Para usar o painel,baixe o arquivo no Modulo de Faturamento/Consulta/Itens Faturados e siga os passos:"),
-                html.Hr(),
-                html.P("1. Prepare sua planilha (Excel ou CSV) garantindo que ela tenha as seguintes colunas:", className="mb-0"),
+                html.P("Baixe o arquivo de Itens Faturados e siga os passos:"),
                 html.Ul([
-                    html.Li(html.B("N° OS")),
-                    html.Li(html.B("Categoria")),
-                    html.Li(html.B("Descrição Item")),
-                    html.Li(html.B("Data Emissao")),
-                    html.Li(html.B("Cliente Faturamento")),
-                    html.Li(html.B("Nome Fantasia")),
-                    html.Li(html.B("R$ Total")),
-                    html.Li(html.B("FRANQUIA - Criar essa etapa e preencher com o nome da franquia")),
-                    html.Li(html.B("CNPJ Cliente")),
-                    html.Li(html.B("Documento")),
-                    html.Li(html.B("Qtde")),
-                    html.Li(html.B("R$ Total")),
-                    html.Li(html.B("R$  CM Fat")),
-                    html.Li(html.B("R$ Markup Fat")),
-                    html.Li(html.B("Vendedor")),
+                    html.Li("Garanta que o arquivo tenha as colunas necessárias (ex: FRANQUIA, R$ Total, etc.)."),
+                    html.Li("Carregue o arquivo no botão abaixo."),
+                    html.Li("Use os filtros para analisar.")
                 ]),
-                html.P("2. Carregue o arquivo no botão abaixo."),
-                html.P("3. Use os filtros interativos para analisar os dados.")
             ], color="info"),
             
             html.H4("Carregar Arquivo", className="mt-4"),
             dcc.Upload(
                 id='upload-data',
                 children=html.Div(['Arraste e solte ou ', html.A('selecione um arquivo')]),
-                style={
-                    'width': '100%', 'height': '60px', 'lineHeight': '60px',
-                    'borderWidth': '2px', 'borderStyle': 'dashed', 'borderRadius': '5px',
-                    'textAlign': 'center', 'margin': '10px 0'
-                }
+                style={'width': '100%', 'height': '60px', 'lineHeight': '60px', 'borderWidth': '2px', 'borderStyle': 'dashed', 'borderRadius': '5px', 'textAlign': 'center', 'margin': '10px 0'}
             ),
             html.Div(id='output-data-upload', className="text-muted small mt-2"),
             html.Hr(),
+            
             html.H4("Filtros", className="mt-4"),
             html.Label("Selecione as Franquias:"),
             dcc.Dropdown(id='dropdown-franquias', multi=True, placeholder="Selecione..."),
             html.Label("Selecione os Produtos (Opcional):", className="mt-3"),
             dcc.Dropdown(id='dropdown-itens', multi=True, placeholder="Selecione..."),
             html.Hr(),
+            
             dbc.Button("Baixar Relatório em Excel", id="btn-download-excel", color="primary", className="w-100 mt-3"),
             dcc.Download(id="download-excel")
         ], width=12, lg=3, style={'backgroundColor': '#f8f9fa', 'padding': '20px', 'borderRadius': '5px'}),
@@ -100,7 +74,6 @@ dbc.Row(
     ])
 ], fluid=True, className="p-4")
 
-
 # --- FUNÇÕES DE PROCESSAMENTO DE DADOS ---
 def parse_contents(contents, filename):
     content_type, content_string = contents.split(',')
@@ -109,23 +82,21 @@ def parse_contents(contents, filename):
         df = pd.read_excel(io.BytesIO(decoded)) if 'xls' in filename else pd.read_csv(io.StringIO(decoded.decode('utf-8')))
         df.columns = [str(col).strip() for col in df.columns]
 
-        # Validação das colunas necessárias
         colunas_necessarias = ['Data Emissao', 'R$ Total', 'FRANQUIA', 'Categoria', 'Descrição Item']
         if not all(col in df.columns for col in colunas_necessarias):
             missing_cols = [col for col in colunas_necessarias if col not in df.columns]
-            return None, f"Erro: Colunas não encontradas no arquivo: {', '.join(missing_cols)}"
+            return None, f"Erro: Colunas não encontradas: {', '.join(missing_cols)}"
 
         df['Data Emissao'] = pd.to_datetime(df['Data Emissao'], dayfirst=True, errors='coerce')
         df['R$ Total'] = pd.to_numeric(df['R$ Total'], errors='coerce')
         df.dropna(subset=colunas_necessarias, inplace=True)
-        return df, f"Arquivo '{filename}' carregado com sucesso."
+        return df, f"Arquivo '{filename}' carregado."
     except Exception as e:
         return None, f'Ocorreu um erro ao processar o arquivo: {e}'
 
-
 # --- CALLBACKS ---
 
-# Callback 1: Processa o arquivo enviado e popula os filtros
+# Callback 1: Processa o arquivo e popula os filtros
 @callback(
     [Output('output-data-upload', 'children'),
      Output('store-dados-processados', 'data'),
@@ -148,7 +119,6 @@ def processa_arquivo_enviado(contents, filename):
         return dbc.Alert(message, color="danger"), None, [], []
     return "", None, [], []
 
-
 # Callback 2: Atualiza o dashboard
 @callback(
     Output('dashboard-content', 'children'),
@@ -166,7 +136,7 @@ def atualiza_dashboard(jsonified_data, franquias_selecionadas, itens_selecionado
     df_filtrado = df[df['FRANQUIA'].isin(franquias_selecionadas)]
     if itens_selecionados:
         df_filtrado = df_filtrado[df_filtrado['Descrição Item'].isin(itens_selecionados)]
-    regex = '|'.join(CATEGORIAS_EXCLUIR)
+    regex = '|'.join(CATEGORias_EXCLUIR)
     df_filtrado = df_filtrado[~df_filtrado['Categoria'].str.contains(regex, case=False, na=False)]
 
     if df_filtrado.empty:
@@ -176,7 +146,7 @@ def atualiza_dashboard(jsonified_data, franquias_selecionadas, itens_selecionado
     total_geral = df_filtrado['R$ Total'].sum()
     total_por_franquia = df_filtrado.groupby('FRANQUIA')['R$ Total'].sum().sort_values(ascending=False)
     
-    # Layout do dashboard
+    # Layout
     return html.Div([
         dbc.Row([
             dbc.Col(dbc.Card([dbc.CardHeader("Faturamento Total"), dbc.CardBody([html.H4(f"R$ {total_geral:,.2f}", className="card-title")])], color="primary", inverse=True)),
@@ -191,12 +161,6 @@ def atualiza_dashboard(jsonified_data, franquias_selecionadas, itens_selecionado
                 df_filtrado.groupby('Categoria')['R$ Total'].sum().nlargest(10).reset_index(),
                 x='R$ Total', y='Categoria', orientation='h', title='Top 10 Categorias por Faturamento', template='plotly_white'
             ).update_layout(yaxis={'categoryorder':'total ascending'}, title_x=0.5)), width=12, lg=6),
-        ], className="mt-4"),
-        dbc.Row([
-             dbc.Col(dcc.Graph(figure=px.line(
-                df_filtrado.set_index('Data Emissao').resample('W-MON').agg({'R$ Total': 'sum'}).reset_index(),
-                x='Data Emissao', y='R$ Total', title='Tendência Semanal de Faturamento (Total)', markers=True, template='plotly_white'
-            ).update_layout(title_x=0.5)), width=12)
         ], className="mt-4")
     ])
 
@@ -229,4 +193,3 @@ def gera_excel_para_download(n_clicks, jsonified_data, franquias_selecionadas, i
         df_final.to_excel(writer, sheet_name='Dados_Filtrados', index=False)
     
     return dcc.send_bytes(output_buffer.getvalue(), "Relatorio_Analitico_Franquias.xlsx")
-
